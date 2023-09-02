@@ -51,7 +51,7 @@ void build()
   case 0:
   {
     hub.WidgetSize(25);
-    if (hub.SwitchIcon_(F("B1"), &byt_1, "Зал", F("")))
+    if (hub.SwitchIcon_(F("B1"), &byt_1, "Зал"))
     {
       byt_1 ? sla_1 = 10 : sla_1 = 0;
       hub.sendUpdate("S1", String(byt_1 ? 10 : 0));
@@ -63,7 +63,7 @@ void build()
       hub.sendUpdate("B1", String(sla_1 ? 1 : 0));
     }
     hub.WidgetSize(25);
-    if (hub.SwitchIcon_(F("B2"), &byt_2, "Спальня", F("")))
+    if (hub.SwitchIcon_(F("B2"), &byt_2, "Спальня"))
     {
       byt_2 ? sla_2 = 10 : sla_2 = 0;
       hub.sendUpdate("S2", String(byt_2 ? 10 : 0));
