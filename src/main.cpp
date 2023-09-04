@@ -2,14 +2,19 @@
 #define AP_SSID "ais1977"
 #define AP_PASS "www254201"
 #define GH_INCLUDE_PORTAL // включить сайт в память программы (не нужно загружать файлы в память)
-
+#define LED_PIN D6        // пин ленты
+#define LED_NUM 3         // кол-во светодиодов
 
 #include <Arduino.h>
 
 #include <FileData.h>
 #include <LittleFS.h>
 
+#include <FastLED.h>
+CRGB leds[LED_NUM];
 
+#include <GyverHub.h>
+GyverHub hub("dom_esp", "DOM", "");
 
 struct Wifi
 {
@@ -20,22 +25,11 @@ Wifi w;
 
 FileData wifi_(&LittleFS, "/data.dat", 'B', &w, sizeof(w));
 
-// подключаем библиотеку и настраиваем устройство
-#include <GyverHub.h>
-GyverHub hub("MyDevices", "DOM", "");
-// иконки
-// https://fontawesome.com/v5/cheatsheet/free/solid
-// https://fontawesome.com/v5/search?o=r&m=free&s=solid
-
-
 //---------------------------------------------
-bool byt_1, byt_2;
-uint8_t sla_1, sla_2, tab;
-String Bt_1;
-
+bool byt_1, byt_2, byt_3;
+uint8_t sla_1, sla_2, tab, sel_0, sel_1, sel_2;
+GHcolor col;
 //---------------------------------------------
-
-
 
 void build()
 {
@@ -75,6 +69,29 @@ void build()
       hub.sendUpdate("B2", String(sla_2 ? 1 : 0));
     }
 
+    hub.WidgetSize(25);
+    if (hub.SwitchIcon_(F("B3"), &byt_3, "Окошки"))
+    {
+    }
+    hub.WidgetSize(37);
+    if (hub.Select(&sel_0, F("цвет,эфекты"), F("Опции")))
+    {
+      hub.refresh();
+    };
+    switch (sel_0)
+    {
+    case 0:
+    {
+      hub.Color_("COL", &col, F("Color"));
+      break;
+    }
+    case 1:
+    {
+      hub.Select(&sel_2, F("kek,puk,lol"), F("Эфекты"));
+      break;
+    }
+    }
+
     break;
   }
 
@@ -100,6 +117,10 @@ void setup()
 {
   Serial.begin(115200);
 
+  FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, LED_NUM);
+  FastLED.setBrightness(50);
+  FastLED.show();
+
   WiFi.mode(WIFI_STA);
   WiFi.begin(AP_SSID, AP_PASS);
   while (WiFi.status() != WL_CONNECTED)
@@ -110,6 +131,8 @@ void setup()
   Serial.println();
   Serial.println(WiFi.localIP());
 
+  hub.setupMQTT("m7.wqtt.ru", 12914, "dom_esp", "www254201");
+
   hub.onBuild(build); // подключаем билдер
   hub.begin();        // запускаем систему
 }
@@ -117,7 +140,15 @@ void setup()
 void loop()
 {
   hub.tick(); // обязательно тикаем тут
+  static GHtimer tmr(1000);
+  if (tmr.ready())
+  {
+    hub.sendGet("B1", String(byt_1));
+    hub.sendGet("S1", String(sla_1));
+    hub.sendGet("C", String(col));
 
- 
+    leds[0].setHSV(255, sla_2 * 25, sla_1 * 25);
+    leds[1] = col;
+    FastLED.show();
+  }
 }
-

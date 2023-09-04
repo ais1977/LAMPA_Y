@@ -92,7 +92,7 @@ class HubMQTT {
    private:
     void connectMQTT() {
         String m_id("DEV-");
-        m_id += String(random(0xffffff), HEX);
+        m_id += "esp_dom";
         bool ok = 0;
 
         String status(getPrefix());
